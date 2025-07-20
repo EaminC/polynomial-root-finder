@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Polynomial Root Finder</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .header {
+        position: relative;
+      }
+
+      .settings-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .settings-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+      }
+
+      .settings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        backdrop-filter: blur(5px);
+      }
+
+      .settings-content {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        position: relative;
+      }
+
+      .settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .settings-header h2 {
+        color: #667eea;
+        margin: 0;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #999;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+      }
+
+      .close-btn:hover {
+        background: #f0f0f0;
+        color: #333;
+      }
+
+      .settings-section {
+        margin-bottom: 25px;
+      }
+
+      .settings-section h3 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .param-group {
+        margin-bottom: 15px;
+      }
+
+      .param-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #555;
+        font-size: 0.9rem;
+      }
+
+      .param-group input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+      }
+
+      .param-group input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .param-description {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 3px;
+      }
+
+      .theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .theme-toggle label {
+        font-weight: 600;
+        color: #555;
+        margin: 0;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 30px;
+        background: #ccc;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .toggle-switch.active {
+        background: #667eea;
+      }
+
+      .toggle-switch::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+
+      .toggle-switch.active::after {
+        transform: translateX(30px);
+      }
+
+      .github-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+      }
+
+      .github-link:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .github-link i {
+        font-size: 1.5rem;
+        color: #333;
+      }
+
+      /* Dark mode styles */
+      body.dark-mode {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      }
+
+      body.dark-mode .input-panel,
+      body.dark-mode .results-panel {
+        background: #2c3e50;
+        color: #ecf0f1;
+      }
+
+      body.dark-mode .settings-content {
+        background: #2c3e50;
+        color: #ecf0f1;
+      }
+
+      body.dark-mode .param-group label {
+        color: #ecf0f1;
+      }
+
+      body.dark-mode .param-group input {
+        background: #34495e;
+        border-color: #4a5f7a;
+        color: #ecf0f1;
+      }
+
+      body.dark-mode .theme-toggle,
+      body.dark-mode .github-link {
+        background: #34495e;
+      }
+
+      body.dark-mode .settings-header {
+        border-bottom-color: #4a5f7a;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .input-panel {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        height: fit-content;
+      }
+
+      .input-panel h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
+        display: block;
+      }
+
+      .examples {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .examples h3 {
+        color: #667eea;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
+
+      .example-item {
+        cursor: pointer;
+        padding: 8px 12px;
+        margin: 5px 0;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .example-item:hover {
+        background: #e9ecef;
+        border-left-color: #667eea;
+      }
+
+      .example-item .equation {
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .example-item .coefficients {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-family: monospace;
+      }
+
+      .coefficient-inputs {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 2px dashed #dee2e6;
+        transition: border-color 0.3s ease;
+      }
+
+      .coefficient-inputs.active {
+        border-color: #667eea;
+        background: #f0f4ff;
+      }
+
+      .coefficient-inputs h3 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .coefficient-grid {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .coefficient-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+      }
+
+      .coefficient-row:hover {
+        border-color: #667eea;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+      }
+
+      .coefficient-row.highlight {
+        background: #e3f2fd;
+        border-color: #2196f3;
+      }
+
+      .coefficient-input {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .coefficient-input input {
+        width: 80px;
+        text-align: center;
+        font-weight: 600;
+        font-family: "Courier New", monospace;
+      }
+
+      .coefficient-term {
+        font-weight: 600;
+        color: #495057;
+        min-width: 60px;
+        text-align: center;
+      }
+
+      .equation-preview {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .equation-preview.empty {
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 2px dashed #dee2e6;
+      }
+
+      .solve-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .solve-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .solve-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .results-panel {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #667eea;
+      }
+
+      .loading i {
+        font-size: 2rem;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .equation-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .equation-display h3 {
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+      }
+
+      .equation-display p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .roots-section {
+        margin-bottom: 30px;
+      }
+
+      .roots-section h3 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+      }
+
+      .roots-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+      }
+
+      .root-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        border-left: 4px solid #667eea;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .root-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .root-card.real {
+        border-left-color: #dc3545;
+      }
+
+      .root-card.complex {
+        border-left-color: #2e86ab;
+      }
+
+      .root-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .root-number {
+        background: #667eea;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+      }
+
+      .root-type {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .root-type.real {
+        background: #dc3545;
+        color: white;
+      }
+
+      .root-type.complex {
+        background: #2e86ab;
+        color: white;
+      }
+
+      .root-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-family: "Courier New", monospace;
+      }
+
+      .root-verification {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-family: "Courier New", monospace;
+      }
+
+      .plots-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .plot-container {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .plot-container h4 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+      }
+
+      .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #f5c6cb;
+        margin-bottom: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+
+        .plots-section {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .coefficient-row {
+          grid-template-columns: 1fr;
+          gap: 5px;
+        }
+
+        .coefficient-input input {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <button class="settings-btn" onclick="openSettings()">
+          <i class="fas fa-cog"></i>
+        </button>
+        <h1><i class="fas fa-square-root-alt"></i> Polynomial Root Finder</h1>
+        <p>
+          Advanced numerical solver for polynomial equations with complex root
+          support
+        </p>
+      </div>
+
+      <div class="main-content">
+        <div class="input-panel">
+          <h2><i class="fas fa-calculator"></i> Input Equation</h2>
+
+          <div class="examples">
+            <h3><i class="fas fa-lightbulb"></i> Quick Examples</h3>
+            <div class="example-item" onclick="setExample(3, [1, 0, -2, 1])">
+              <div class="equation">x³ - 2x + 1 = 0</div>
+              <div class="coefficients">
+                Degree: 3 | Coefficients: 1, 0, -2, 1
+              </div>
+            </div>
+            <div class="example-item" onclick="setExample(2, [1, 0, -4])">
+              <div class="equation">x² - 4 = 0</div>
+              <div class="coefficients">Degree: 2 | Coefficients: 1, 0, -4</div>
+            </div>
+            <div class="example-item" onclick="setExample(3, [1, 0, 0, 1])">
+              <div class="equation">x³ + 1 = 0</div>
+              <div class="coefficients">
+                Degree: 3 | Coefficients: 1, 0, 0, 1
+              </div>
+            </div>
+            <div class="example-item" onclick="setExample(4, [1, 0, -5, 0, 4])">
+              <div class="equation">x⁴ - 5x² + 4 = 0</div>
+              <div class="coefficients">
+                Degree: 4 | Coefficients: 1, 0, -5, 0, 4
+              </div>
+            </div>
+            <div
+              class="example-item"
+              onclick="setExample(5, [1, 0, 0, 0, 0, -1])"
+            >
+              <div class="equation">x⁵ - 1 = 0</div>
+              <div class="coefficients">
+                Degree: 5 | Coefficients: 1, 0, 0, 0, 0, -1
+              </div>
+            </div>
+            <div
+              class="example-item"
+              onclick="setExample(8, [1, 0, 0, 0, 0, 0, 0, 0, -1])"
+            >
+              <div class="equation">x⁸ - 1 = 0</div>
+              <div class="coefficients">
+                Degree: 8 | Coefficients: 1, 0, 0, 0, 0, 0, 0, 0, -1
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="degree">
+              <i class="fas fa-sort-numeric-up"></i> Polynomial Degree
+            </label>
+            <input
+              type="number"
+              id="degree"
+              min="1"
+              max="50"
+              placeholder="Enter degree (1-50)"
+              onchange="updateCoefficientInputs()"
+              oninput="updateCoefficientInputs()"
+            />
+            <small class="form-text">Enter any degree from 1 to 50</small>
+          </div>
+
+          <div class="coefficient-inputs" id="coefficient-inputs">
+            <h3><i class="fas fa-edit"></i> Coefficient Input</h3>
+            <div class="equation-preview empty" id="equation-preview">
+              Select a degree to start
+            </div>
+            <div class="coefficient-grid" id="coefficient-grid">
+              <!-- Dynamic coefficient inputs will be generated here -->
+            </div>
+          </div>
+
+          <button
+            class="solve-btn"
+            onclick="solveEquation()"
+            id="solve-btn"
+            disabled
+          >
+            <i class="fas fa-search"></i> Find All Roots
+          </button>
+        </div>
+
+        <div class="results-panel" id="results-panel">
+          <div class="loading" id="loading" style="display: none">
+            <i class="fas fa-spinner"></i>
+            <p>Solving equation...</p>
+          </div>
+
+          <div id="results-content" style="display: none">
+            <div class="equation-display" id="equation-display"></div>
+
+            <div class="roots-section">
+              <h3><i class="fas fa-bullseye"></i> Found Roots</h3>
+              <div class="roots-grid" id="roots-grid"></div>
+            </div>
+
+            <div class="plots-section">
+              <div class="plot-container">
+                <h4><i class="fas fa-chart-line"></i> Function Graph</h4>
+                <div id="plot1"></div>
+              </div>
+              <div class="plot-container">
+                <h4><i class="fas fa-compass"></i> Complex Plane</h4>
+                <div id="plot2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal">
+      <div class="settings-content">
+        <div class="settings-header">
+          <h2><i class="fas fa-cog"></i> Settings</h2>
+          <button class="close-btn" onclick="closeSettings()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <div class="settings-section">
+          <div class="theme-toggle">
+            <label>Dark Mode</label>
+            <div
+              class="toggle-switch"
+              id="theme-toggle"
+              onclick="toggleTheme()"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Algorithm Parameters -->
+        <div class="settings-section">
+          <h3><i class="fas fa-sliders-h"></i> Algorithm Parameters</h3>
+
+          <div class="param-group">
+            <label for="err6">Newton-Raphson Iteration Tolerance</label>
+            <input
+              type="number"
+              id="err6"
+              value="1e-6"
+              step="1e-8"
+              min="1e-10"
+              max="1e-3"
+            />
+            <div class="param-description">N-R迭代跳出精度 (默认: 1e-6)</div>
+          </div>
+
+          <div class="param-group">
+            <label for="err">Complex Distance Tolerance</label>
+            <input
+              type="number"
+              id="err"
+              value="5e-2"
+              step="1e-3"
+              min="1e-4"
+              max="1e-1"
+            />
+            <div class="param-description">
+              判定复数距离小于err即为相等 (默认: 5e-2)
+            </div>
+          </div>
+
+          <div class="param-group">
+            <label for="aberth">Aberth Iteration Count</label>
+            <input
+              type="number"
+              id="aberth"
+              value="1200"
+              min="100"
+              max="5000"
+              step="100"
+            />
+            <div class="param-description">Aberth迭代次数 (默认: 1200)</div>
+          </div>
+
+          <div class="param-group">
+            <label for="chongshumax">Maximum Root Multiplicity</label>
+            <input
+              type="number"
+              id="chongshumax"
+              value="30000"
+              min="1000"
+              max="100000"
+              step="1000"
+            />
+            <div class="param-description">方程解最高重数 (默认: 30000)</div>
+          </div>
+
+          <div class="param-group">
+            <label for="printprecision">Output Precision</label>
+            <input
+              type="number"
+              id="printprecision"
+              value="9"
+              min="6"
+              max="15"
+              step="1"
+            />
+            <div class="param-description">输出有效位数 (默认: 9)</div>
+          </div>
+
+          <div class="param-group">
+            <label for="range">Initial Value Range</label>
+            <input
+              type="number"
+              id="range"
+              value="150"
+              min="10"
+              max="1000"
+              step="10"
+            />
+            <div class="param-description">
+              初始值实部虚部最大绝对值 (默认: 150)
+            </div>
+          </div>
+        </div>
+
+        <!-- GitHub Link -->
+        <div class="settings-section">
+          <a
+            href="https://github.com/EaminC/polynomial-root-finder"
+            target="_blank"
+            class="github-link"
+          >
+            <i class="fab fa-github"></i>
+            <div>
+              <strong>View on GitHub</strong>
+              <div style="font-size: 0.8rem; color: #666; margin-top: 2px">
+                Open source polynomial root finder
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Save Button -->
+        <div class="settings-section">
+          <button class="solve-btn" onclick="saveSettings()">
+            <i class="fas fa-save"></i> Save Settings
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentDegree = 0;
+      let coefficients = [];
+
+      function setExample(degree, coeffs) {
+        currentDegree = degree;
+        coefficients = coeffs;
+
+        // Set degree input
+        document.getElementById("degree").value = degree;
+
+        // Update coefficient inputs
+        updateCoefficientInputs();
+
+        // Fill in coefficients
+        setTimeout(() => {
+          for (let i = 0; i < coeffs.length; i++) {
+            const input = document.getElementById(`coeff-${i}`);
+            if (input) {
+              input.value = coeffs[i];
+            }
+          }
+          updateEquationPreview();
+        }, 100);
+      }
+
+      function updateCoefficientInputs() {
+        const degree = parseInt(document.getElementById("degree").value);
+
+        if (degree && degree >= 1 && degree <= 50) {
+          generateCoefficientInputs(degree);
+        } else {
+          hideCoefficientInputs();
+        }
+      }
+
+      function hideCoefficientInputs() {
+        const container = document.getElementById("coefficient-inputs");
+        const grid = document.getElementById("coefficient-grid");
+        const preview = document.getElementById("equation-preview");
+        const solveBtn = document.getElementById("solve-btn");
+
+        container.classList.remove("active");
+        preview.className = "equation-preview empty";
+        preview.textContent = "Select a degree to start";
+        grid.innerHTML = "";
+        solveBtn.disabled = true;
+      }
+
+      function generateCoefficientInputs(degree) {
+        const container = document.getElementById("coefficient-inputs");
+        const grid = document.getElementById("coefficient-grid");
+        const preview = document.getElementById("equation-preview");
+        const solveBtn = document.getElementById("solve-btn");
+
+        container.classList.add("active");
+        preview.className = "equation-preview";
+        solveBtn.disabled = false;
+
+        // Generate coefficient inputs
+        grid.innerHTML = "";
+        for (let i = 0; i <= degree; i++) {
+          const power = degree - i;
+          const row = document.createElement("div");
+          row.className = "coefficient-row";
+
+          let term = "";
+          if (power === 0) {
+            term = "constant";
+          } else if (power === 1) {
+            term = "x";
+          } else {
+            term = `x<sup>${power}</sup>`;
+          }
+
+          row.innerHTML = `
+                    <div class="coefficient-input">
+                        <input type="number" 
+                               id="coeff-${i}" 
+                               step="any" 
+                               placeholder="0" 
+                               onchange="updateEquationPreview()"
+                               oninput="updateEquationPreview()">
+                        <span class="coefficient-term">${term}</span>
+                    </div>
+                `;
+
+          grid.appendChild(row);
+        }
+
+        updateEquationPreview();
+      }
+
+      function updateEquationPreview() {
+        const degree = parseInt(document.getElementById("degree").value);
+        const preview = document.getElementById("equation-preview");
+
+        if (!degree || degree < 1) {
+          preview.className = "equation-preview empty";
+          preview.textContent = "Enter a degree to start";
+          return;
+        }
+
+        let equation = "";
+        let hasNonZero = false;
+
+        for (let i = 0; i <= degree; i++) {
+          const input = document.getElementById(`coeff-${i}`);
+          const coeff = input ? parseFloat(input.value) || 0 : 0;
+          const power = degree - i;
+
+          if (coeff !== 0) {
+            hasNonZero = true;
+
+            if (equation && coeff > 0) {
+              equation += " + ";
+            }
+
+            if (coeff === -1 && power > 0) {
+              equation += "-";
+            } else if (coeff !== 1 || power === 0) {
+              equation += coeff;
+            }
+
+            if (power === 1) {
+              equation += "x";
+            } else if (power > 1) {
+              equation += `x<sup>${power}</sup>`;
+            }
+          }
+        }
+
+        if (!hasNonZero) {
+          equation = "0";
+        }
+
+        preview.innerHTML = equation + " = 0";
+      }
+
+      function getCoefficients() {
+        const degree = parseInt(document.getElementById("degree").value);
+        const coeffs = [];
+
+        for (let i = 0; i <= degree; i++) {
+          const input = document.getElementById(`coeff-${i}`);
+          const value = input ? parseFloat(input.value) || 0 : 0;
+          coeffs.push(value);
+        }
+
+        return coeffs;
+      }
+
+      function solveEquation() {
+        const degree = parseInt(document.getElementById("degree").value);
+        const coefficients = getCoefficients();
+
+        if (!degree || degree < 1) {
+          alert("Please enter a polynomial degree");
+          return;
+        }
+
+        // Check if all coefficients are zero
+        const allZero = coefficients.every((coeff) => coeff === 0);
+        if (allZero) {
+          alert("Please enter at least one non-zero coefficient");
+          return;
+        }
+
+        // Show loading
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("results-content").style.display = "none";
+        document.getElementById("solve-btn").disabled = true;
+
+        // Convert coefficients to string
+        const coeffString = coefficients.join(" ");
+
+        // Send request with parameters
+        fetch("/solve", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            coefficients: coeffString,
+            params: algorithmParams,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("solve-btn").disabled = false;
+
+            if (data.error) {
+              showError(data.error);
+              return;
+            }
+
+            displayResults(data);
+          })
+          .catch((error) => {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("solve-btn").disabled = false;
+            showError("Network error: " + error.message);
+          });
+      }
+
+      function showError(message) {
+        const resultsPanel = document.getElementById("results-panel");
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error-message";
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+
+        // Remove any existing error messages
+        const existingError = resultsPanel.querySelector(".error-message");
+        if (existingError) {
+          existingError.remove();
+        }
+
+        resultsPanel.insertBefore(errorDiv, resultsPanel.firstChild);
+      }
+
+      function displayResults(data) {
+        // Display equation
+        document.getElementById("equation-display").innerHTML = `
+                <h3>${data.equation} = 0</h3>
+                <p>Degree: ${data.degree} | Found ${data.roots.length} roots</p>
+            `;
+
+        // Display roots
+        const rootsGrid = document.getElementById("roots-grid");
+        rootsGrid.innerHTML = "";
+
+        data.roots.forEach((root, index) => {
+          const rootCard = document.createElement("div");
+          rootCard.className = `root-card ${root.type}`;
+          rootCard.innerHTML = `
+                    <div class="root-header">
+                        <div class="root-number">${root.index}</div>
+                        <div class="root-type ${root.type}">${root.type}</div>
+                    </div>
+                    <div class="root-value">${root.value}</div>
+                    <div class="root-verification">f(${root.value}) = ${root.verification}</div>
+                `;
+          rootsGrid.appendChild(rootCard);
+        });
+
+        // Display plots
+        Plotly.newPlot(
+          "plot1",
+          JSON.parse(data.plot1).data,
+          JSON.parse(data.plot1).layout
+        );
+        Plotly.newPlot(
+          "plot2",
+          JSON.parse(data.plot2).data,
+          JSON.parse(data.plot2).layout
+        );
+
+        // Show results
+        document.getElementById("results-content").style.display = "block";
+      }
+
+      // Settings functionality
+      let isDarkMode = localStorage.getItem("darkMode") === "true";
+      let algorithmParams = {
+        err6: 1e-6,
+        err: 5e-2,
+        aberth: 1200,
+        chongshumax: 30000,
+        printprecision: 9,
+        range: 150,
+      };
+
+      // Load saved settings
+      function loadSettings() {
+        const savedParams = localStorage.getItem("algorithmParams");
+        if (savedParams) {
+          algorithmParams = JSON.parse(savedParams);
+          // Update input fields
+          Object.keys(algorithmParams).forEach((key) => {
+            const input = document.getElementById(key);
+            if (input) {
+              input.value = algorithmParams[key];
+            }
+          });
+        }
+
+        // Apply dark mode
+        if (isDarkMode) {
+          document.body.classList.add("dark-mode");
+          document.getElementById("theme-toggle").classList.add("active");
+        }
+      }
+
+      function openSettings() {
+        document.getElementById("settings-modal").style.display = "flex";
+      }
+
+      function closeSettings() {
+        document.getElementById("settings-modal").style.display = "none";
+      }
+
+      function toggleTheme() {
+        const toggle = document.getElementById("theme-toggle");
+        isDarkMode = !isDarkMode;
+
+        if (isDarkMode) {
+          document.body.classList.add("dark-mode");
+          toggle.classList.add("active");
+        } else {
+          document.body.classList.remove("dark-mode");
+          toggle.classList.remove("active");
+        }
+
+        localStorage.setItem("darkMode", isDarkMode);
+      }
+
+      function saveSettings() {
+        // Collect parameters
+        algorithmParams = {
+          err6: parseFloat(document.getElementById("err6").value),
+          err: parseFloat(document.getElementById("err").value),
+          aberth: parseInt(document.getElementById("aberth").value),
+          chongshumax: parseInt(document.getElementById("chongshumax").value),
+          printprecision: parseInt(
+            document.getElementById("printprecision").value
+          ),
+          range: parseInt(document.getElementById("range").value),
+        };
+
+        // Save to localStorage
+        localStorage.setItem(
+          "algorithmParams",
+          JSON.stringify(algorithmParams)
+        );
+
+        // Show success message
+        alert("Settings saved successfully!");
+        closeSettings();
+      }
+
+      // Close modal when clicking outside
+      document
+        .getElementById("settings-modal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeSettings();
+          }
+        });
+
+      // Initialize
+      loadSettings();
+      updateCoefficientInputs();
+    </script>
+  </body>
+</html>
