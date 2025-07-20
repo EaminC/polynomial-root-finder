@@ -463,6 +463,42 @@
         border: 2px dashed #dee2e6;
       }
 
+      .coefficient-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .action-btn {
+        flex: 1;
+        padding: 10px 15px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+      }
+
+      .action-btn:last-child {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+      }
+
+      .action-btn:last-child:hover {
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+      }
+
       .solve-btn {
         width: 100%;
         padding: 15px;
@@ -753,7 +789,15 @@
           <div class="coefficient-inputs" id="coefficient-inputs">
             <h3><i class="fas fa-edit"></i> Coefficient Input</h3>
             <div class="equation-preview empty" id="equation-preview">
-              Select a degree to start
+              Enter a degree to start
+            </div>
+            <div class="coefficient-actions">
+              <button class="action-btn" onclick="randomizeCoefficients()">
+                <i class="fas fa-dice"></i> Randomize All
+              </button>
+              <button class="action-btn" onclick="clearCoefficients()">
+                <i class="fas fa-eraser"></i> Clear All
+              </button>
             </div>
             <div class="coefficient-grid" id="coefficient-grid">
               <!-- Dynamic coefficient inputs will be generated here -->
@@ -835,7 +879,9 @@
               min="1e-10"
               max="1e-3"
             />
-            <div class="param-description">N-R迭代跳出精度 (默认: 1e-6)</div>
+            <div class="param-description">
+              N-R iteration exit precision (Default: 1e-6)
+            </div>
           </div>
 
           <div class="param-group">
@@ -849,7 +895,8 @@
               max="1e-1"
             />
             <div class="param-description">
-              判定复数距离小于err即为相等 (默认: 5e-2)
+              Complex numbers with distance less than err are considered equal
+              (Default: 5e-2)
             </div>
           </div>
 
@@ -863,7 +910,9 @@
               max="5000"
               step="100"
             />
-            <div class="param-description">Aberth迭代次数 (默认: 1200)</div>
+            <div class="param-description">
+              Aberth iteration count (Default: 1200)
+            </div>
           </div>
 
           <div class="param-group">
@@ -876,7 +925,9 @@
               max="100000"
               step="1000"
             />
-            <div class="param-description">方程解最高重数 (默认: 30000)</div>
+            <div class="param-description">
+              Maximum root multiplicity (Default: 30000)
+            </div>
           </div>
 
           <div class="param-group">
@@ -889,7 +940,9 @@
               max="15"
               step="1"
             />
-            <div class="param-description">输出有效位数 (默认: 9)</div>
+            <div class="param-description">
+              Output significant digits (Default: 9)
+            </div>
           </div>
 
           <div class="param-group">
@@ -903,7 +956,8 @@
               step="10"
             />
             <div class="param-description">
-              初始值实部虚部最大绝对值 (默认: 150)
+              Maximum absolute value for real and imaginary parts of initial
+              values (Default: 150)
             </div>
           </div>
         </div>
@@ -978,7 +1032,7 @@
 
         container.classList.remove("active");
         preview.className = "equation-preview empty";
-        preview.textContent = "Select a degree to start";
+        preview.textContent = "Enter a degree to start";
         grid.innerHTML = "";
         solveBtn.disabled = true;
       }
@@ -1273,6 +1327,44 @@
         // Show success message
         alert("Settings saved successfully!");
         closeSettings();
+      }
+
+      function randomizeCoefficients() {
+        const degree = parseInt(document.getElementById("degree").value);
+        if (!degree || degree < 1) {
+          alert("Please enter a polynomial degree first");
+          return;
+        }
+
+        // Generate random coefficients
+        for (let i = 0; i <= degree; i++) {
+          const input = document.getElementById(`coeff-${i}`);
+          if (input) {
+            // Generate random coefficient between -10 and 10
+            const randomCoeff = (Math.random() - 0.5) * 20;
+            input.value = randomCoeff.toFixed(2);
+          }
+        }
+
+        updateEquationPreview();
+      }
+
+      function clearCoefficients() {
+        const degree = parseInt(document.getElementById("degree").value);
+        if (!degree || degree < 1) {
+          alert("Please enter a polynomial degree first");
+          return;
+        }
+
+        // Clear all coefficients
+        for (let i = 0; i <= degree; i++) {
+          const input = document.getElementById(`coeff-${i}`);
+          if (input) {
+            input.value = "";
+          }
+        }
+
+        updateEquationPreview();
       }
 
       // Close modal when clicking outside
