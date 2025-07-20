@@ -51,10 +51,15 @@
         position: relative;
       }
 
-      .settings-btn {
+      .header-controls {
         position: absolute;
         top: 20px;
         right: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .control-btn {
         background: rgba(255, 255, 255, 0.2);
         border: none;
         border-radius: 50%;
@@ -65,11 +70,26 @@
         cursor: pointer;
         transition: all 0.3s ease;
         backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .control-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
       }
 
       .settings-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: rotate(90deg);
+        transform: translateY(-2px) rotate(90deg);
+      }
+
+      .theme-btn:hover {
+        transform: translateY(-2px) scale(1.1);
+      }
+
+      .github-btn:hover {
+        transform: translateY(-2px) scale(1.1);
       }
 
       .settings-modal {
@@ -712,9 +732,17 @@
   <body>
     <div class="container">
       <div class="header">
-        <button class="settings-btn" onclick="openSettings()">
-          <i class="fas fa-cog"></i>
-        </button>
+        <div class="header-controls">
+          <button class="control-btn github-btn" onclick="openGitHub()">
+            <i class="fab fa-github"></i>
+          </button>
+          <button class="control-btn theme-btn" onclick="toggleTheme()">
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
+          <button class="control-btn settings-btn" onclick="openSettings()">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
         <h1><i class="fas fa-square-root-alt"></i> Polynomial Root Finder</h1>
         <p>
           Advanced numerical solver for polynomial equations with complex root
@@ -853,18 +881,6 @@
           </button>
         </div>
 
-        <!-- Theme Toggle -->
-        <div class="settings-section">
-          <div class="theme-toggle">
-            <label>Dark Mode</label>
-            <div
-              class="toggle-switch"
-              id="theme-toggle"
-              onclick="toggleTheme()"
-            ></div>
-          </div>
-        </div>
-
         <!-- Algorithm Parameters -->
         <div class="settings-section">
           <h3><i class="fas fa-sliders-h"></i> Algorithm Parameters</h3>
@@ -960,23 +976,22 @@
               values (Default: 150)
             </div>
           </div>
-        </div>
 
-        <!-- GitHub Link -->
-        <div class="settings-section">
-          <a
-            href="https://github.com/EaminC/polynomial-root-finder"
-            target="_blank"
-            class="github-link"
-          >
-            <i class="fab fa-github"></i>
-            <div>
-              <strong>View on GitHub</strong>
-              <div style="font-size: 0.8rem; color: #666; margin-top: 2px">
-                Open source polynomial root finder
-              </div>
+          <div class="param-group">
+            <label for="zero_threshold">Zero Threshold</label>
+            <input
+              type="number"
+              id="zero_threshold"
+              value="1e-8"
+              step="1e-12"
+              min="1e-15"
+              max="1e-6"
+            />
+            <div class="param-description">
+              Values smaller than this threshold will be set to zero (Default:
+              1e-8)
             </div>
-          </a>
+          </div>
         </div>
 
         <!-- Save Button -->
@@ -1259,6 +1274,7 @@
         chongshumax: 30000,
         printprecision: 9,
         range: 150,
+        zero_threshold: 1e-8,
       };
 
       // Load saved settings
@@ -1278,7 +1294,7 @@
         // Apply dark mode
         if (isDarkMode) {
           document.body.classList.add("dark-mode");
-          document.getElementById("theme-toggle").classList.add("active");
+          document.getElementById("theme-icon").className = "fas fa-sun";
         }
       }
 
@@ -1291,18 +1307,25 @@
       }
 
       function toggleTheme() {
-        const toggle = document.getElementById("theme-toggle");
+        const themeIcon = document.getElementById("theme-icon");
         isDarkMode = !isDarkMode;
 
         if (isDarkMode) {
           document.body.classList.add("dark-mode");
-          toggle.classList.add("active");
+          themeIcon.className = "fas fa-sun";
         } else {
           document.body.classList.remove("dark-mode");
-          toggle.classList.remove("active");
+          themeIcon.className = "fas fa-moon";
         }
 
         localStorage.setItem("darkMode", isDarkMode);
+      }
+
+      function openGitHub() {
+        window.open(
+          "https://github.com/EaminC/polynomial-root-finder",
+          "_blank"
+        );
       }
 
       function saveSettings() {
@@ -1316,6 +1339,9 @@
             document.getElementById("printprecision").value
           ),
           range: parseInt(document.getElementById("range").value),
+          zero_threshold: parseFloat(
+            document.getElementById("zero_threshold").value
+          ),
         };
 
         // Save to localStorage
@@ -1336,13 +1362,13 @@
           return;
         }
 
-        // Generate random coefficients
+        // Generate random integer coefficients
         for (let i = 0; i <= degree; i++) {
           const input = document.getElementById(`coeff-${i}`);
           if (input) {
-            // Generate random coefficient between -10 and 10
-            const randomCoeff = (Math.random() - 0.5) * 20;
-            input.value = randomCoeff.toFixed(2);
+            // Generate random integer coefficient between -10 and 10
+            const randomCoeff = Math.floor(Math.random() * 21) - 10;
+            input.value = randomCoeff;
           }
         }
 

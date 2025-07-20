@@ -1,182 +1,181 @@
-# Univariate N-degree Equation Numerical Solver (Enhanced Version)
+# Polynomial Root Finder
 
-This is a Python implementation of a univariate N-degree equation numerical solver that supports multiple numerical methods to find equation roots, including **Aberth iteration method** and **complex root** support.
+A powerful, interactive web application for solving polynomial equations with complex root support using advanced numerical methods.
 
-## Features
+![Polynomial Root Finder](https://github.com/EaminC/polynomial-root-finder/raw/main/screenshot.png)
 
-- **Multiple numerical methods**: Supports bisection method, Newton's method, secant method
-- **Aberth iteration method**: Specifically designed for solving all roots of polynomial equations
-- **Complex root support**: Can find and handle complex roots
-- **Automatic root finding**: Automatically finds all roots in a specified range
-- **Visualization**: Plots function graphs and root distribution in the complex plane
-- **User-friendly**: Provides interactive interface and preset examples
-- **High precision**: Supports customizable precision requirements
+## 🌟 Features
 
-## Core Algorithm
+### 🧮 **Advanced Solver**
 
-### Aberth Iteration + Newton Refinement
+- **Complex Root Support**: Find both real and complex roots
+- **Aberth + Newton Method**: High-precision numerical algorithm
+- **Arbitrary Degree**: Support for polynomials up to degree 50
+- **Multiple Root Detection**: Handles repeated roots efficiently
 
-This is the core algorithm of the program, combining the advantages of two methods:
+### 🎨 **Interactive Interface**
 
-1. **Aberth iteration**: Simultaneously updates all root estimates, avoiding convergence to the same root
-2. **Newton refinement**: High-precision refinement for each root
+- **Visual Input**: Dynamic coefficient input based on polynomial degree
+- **Real-time Preview**: Live equation display as you type
+- **Quick Examples**: Pre-defined polynomials for instant testing
+- **Random Generation**: Generate random integer coefficients (-10 to 10)
+- **One-click Clear**: Reset all coefficients instantly
 
-**Algorithm steps:**
+### 🌙 **Theme Support**
 
-```python
-# 1. Randomly generate initial root estimates
-z = [complex(random.uniform(-range, range), random.uniform(-range, range)) for _ in range(degree)]
+- **Light/Dark Mode**: Toggle between themes with persistent preference
+- **Responsive Design**: Works perfectly on desktop and mobile
+- **Modern UI**: Beautiful gradients and smooth animations
 
-# 2. Aberth iteration
-for k in range(max_iter):
-    for i in range(N):
-        # Calculate f(z[i]) / f'(z[i])
-        c = f(z[i]) / df(z[i])
+### ⚙️ **Customizable Parameters**
 
-        # Calculate sum term 1/(z[i] - z[j])
-        s = sum(1/(z[i] - z[j]) for j in range(N) if j != i)
+- **Newton-Raphson Tolerance**: Control iteration precision
+- **Complex Distance Tolerance**: Adjust root uniqueness criteria
+- **Aberth Iteration Count**: Fine-tune convergence
+- **Initial Value Range**: Optimize search space
+- **Output Precision**: Set display accuracy
 
-        # Update w[i]
-        w[i] = 1 / (c - s)
+### 📊 **Visualization**
 
-    # Update root estimates
-    z[i] = z[i] - w[i]
+- **Function Graph**: Real-time plotting of polynomial function
+- **Complex Plane**: Root distribution visualization
+- **Interactive Plots**: Zoom, pan, and hover for details
+- **Root Classification**: Clear distinction between real and complex roots
 
-# 3. Newton refinement
-for root in z:
-    for _ in range(newton_iter):
-        root = root - f(root) / df(root)
-```
+## 🚀 Quick Start
 
-## Installation
+### Prerequisites
 
 ```bash
-pip install -r requirements.txt
+pip install flask plotly numpy
 ```
 
-## Usage
+### Installation
 
-### Run the program
+1. Clone the repository:
 
 ```bash
-python main.py
+git clone https://github.com/EaminC/polynomial-root-finder.git
+cd polynomial-root-finder
 ```
 
-### Program options
+2. Run the application:
 
-The program provides the following options:
-
-1. **x³ - 2x + 1 = 0** - Cubic equation example
-2. **x² - 4 = 0** - Quadratic equation example
-3. **x⁴ - 5x² + 4 = 0** - Quartic equation example
-4. **x³ + 1 = 0** - Equation with complex roots example
-5. **Custom equation** - Enter your own equation coefficients
-
-### Custom equation input format
-
-For equation: aₙxⁿ + aₙ₋₁xⁿ⁻¹ + ... + a₁x + a₀ = 0
-
-Enter coefficients: `aₙ aₙ₋₁ ... a₁ a₀`
-
-**Examples:**
-
-- x³ - 2x + 1 = 0 → Enter: `1 0 -2 1`
-- x² - 4 = 0 → Enter: `1 0 -4`
-- x⁴ - 5x² + 4 = 0 → Enter: `1 0 -5 0 4`
-- x³ + 1 = 0 → Enter: `1 0 0 1`
-
-## Numerical Methods
-
-### 1. Aberth Iteration Method (Aberth Method)
-
-- **Principle**: Simultaneously updates all root estimates, avoiding convergence to the same root
-- **Advantages**: Can find all roots, including complex roots
-- **Disadvantages**: Higher computational complexity
-- **Applicable**: All root solving for polynomial equations
-
-### 2. Newton's Method (Newton's Method)
-
-- **Principle**: Uses the tangent line at a point to approximate the root
-- **Advantages**: Fast convergence (quadratic convergence)
-- **Disadvantages**: Requires derivative calculation, sensitive to initial values
-- **Applicable**: Smooth functions with initial values close to roots
-
-### 3. Bisection Method (Bisection Method)
-
-- **Principle**: Uses the property that continuous functions have opposite signs at interval endpoints
-- **Advantages**: Stable convergence, independent of initial values
-- **Disadvantages**: Slow convergence
-- **Applicable**: Scenarios requiring stable convergence
-
-### 4. Secant Method (Secant Method)
-
-- **Principle**: Uses secant lines instead of tangent lines to avoid derivative calculation
-- **Advantages**: No derivative calculation needed, relatively fast convergence
-- **Disadvantages**: Requires two initial values
-- **Applicable**: Cases where derivative calculation is difficult
-
-## Program Output
-
-The program will output:
-
-1. Basic information about the equation
-2. All found roots (including complex roots) and their verification
-3. Dual graph display:
-   - Function graph (real part) and real root positions
-   - Root distribution in the complex plane
-
-## Example Output
-
-```
-=== Univariate N-degree Equation Numerical Solver (Enhanced Version) ===
-
-Equation: x^3 + 1 = 0
-Degree: 3
-
-Solving all roots using Aberth+Newton method...
-Found 3 roots:
-Root 1: x = -1.00000000 (real root)
-Verification: f(-1.00000000) = 0.00e+00
-Root 2: x = 0.50000000 + 0.86602540i (complex root)
-Verification: f(0.50000000 + 0.86602540i) = 1.11e-16
-Root 3: x = 0.50000000 - 0.86602540i (complex root)
-Verification: f(0.50000000 - 0.86602540i) = 1.11e-16
+```bash
+python app.py
 ```
 
-## Complex Root Handling
+3. Open your browser and navigate to:
 
-The program can:
+```
+http://localhost:5001
+```
 
-- Automatically identify real roots and complex roots
-- Visualize root distribution in the complex plane
-- Handle conjugate complex root pairs
-- Verify the correctness of complex roots
+## 📖 Usage
 
-## Notes
+### Basic Usage
 
-1. Ensure the input coefficients are correct, from highest to lowest degree
-2. Aberth iteration is sensitive to initial values, the program uses random initialization
-3. Complex roots will be displayed in the form a + bi
-4. Graph display requires graphical interface support
-5. The program automatically removes duplicate roots
+1. **Enter Polynomial Degree**: Type any degree from 1 to 50
+2. **Input Coefficients**: Fill in the coefficient fields that appear
+3. **Click "Find All Roots"**: Get instant results with visualizations
 
-## Technical Implementation
+### Advanced Features
 
-- **Language**: Python 3.7+
-- **Main libraries**: NumPy (numerical computation), Matplotlib (plotting)
-- **Design pattern**: Object-oriented design with good encapsulation
-- **Error handling**: Includes division by zero checks, convergence judgments, etc.
-- **Complex number support**: Uses Python's built-in complex type
+- **Randomize All**: Generate random integer coefficients
+- **Clear All**: Reset all inputs quickly
+- **Quick Examples**: Try pre-defined polynomials
+- **Settings**: Adjust algorithm parameters for optimal results
 
-## Extensible Features
+### Example Polynomials
 
-Features that can be easily extended:
+- **x³ - 2x + 1 = 0**: Three real roots
+- **x² - 4 = 0**: Two real roots (±2)
+- **x³ + 1 = 0**: One real and two complex roots
+- **x⁴ - 5x² + 4 = 0**: Four real roots
+- **x⁵ - 1 = 0**: Five complex roots (fifth roots of unity)
+- **x⁸ - 1 = 0**: Eight complex roots (eighth roots of unity)
 
-- Add more numerical methods (e.g., Steffensen method, Muller method)
-- Support for multiple root detection and handling
-- Add equation system solving
-- Support for symbolic computation
-- Add more visualization options
-- Support for high-precision computation (using mpmath library)
-# polynomial-root-finder
-# polynomial-root-finder
+## 🔧 Algorithm Details
+
+### Aberth Method
+
+The Aberth method is an iterative algorithm for finding all roots of a polynomial simultaneously. It's particularly effective for polynomials with complex roots.
+
+### Newton Refinement
+
+After the Aberth method provides initial estimates, Newton's method refines each root to high precision.
+
+### Parameter Tuning
+
+- **err6**: Newton-Raphson iteration tolerance (default: 1e-6)
+- **err**: Complex distance tolerance (default: 5e-2)
+- **aberth**: Aberth iteration count (default: 1200)
+- **range**: Initial value range (default: 150)
+
+## 🎯 Use Cases
+
+### Education
+
+- **Mathematics Classes**: Visualize polynomial behavior
+- **Numerical Analysis**: Demonstrate root-finding algorithms
+- **Complex Analysis**: Explore complex root patterns
+
+### Research
+
+- **Algorithm Testing**: Validate numerical methods
+- **Polynomial Analysis**: Study root distributions
+- **Performance Benchmarking**: Test solver efficiency
+
+### Development
+
+- **Mathematical Libraries**: Reference implementation
+- **Educational Tools**: Interactive learning platform
+- **Scientific Computing**: Quick polynomial analysis
+
+## 🛠️ Technical Stack
+
+- **Backend**: Flask (Python)
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Visualization**: Plotly.js
+- **Mathematics**: NumPy
+- **Styling**: Custom CSS with gradients and animations
+
+## 📱 Browser Support
+
+- ✅ Chrome/Chromium
+- ✅ Firefox
+- ✅ Safari
+- ✅ Edge
+- ✅ Mobile browsers
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Setup
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Original Algorithm**: Based on Aberth's method for polynomial root finding
+- **UI Inspiration**: Modern web design principles
+- **Mathematical Foundation**: Classical numerical analysis techniques
+
+## 📞 Contact
+
+- **Author**: EaminC
+- **GitHub**: [@EaminC](https://github.com/EaminC)
+- **Project**: [Polynomial Root Finder](https://github.com/EaminC/polynomial-root-finder)
+
+---
+
+⭐ **Star this repository if you find it useful!**

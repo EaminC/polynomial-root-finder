@@ -118,7 +118,7 @@ class ComplexEquationSolver:
         return self.solve_all_roots_custom(range_val, aberth_iter, newton_iter, 1e-6, 1e-6)
     
     def solve_all_roots_custom(self, range_val: float = 10.0, aberth_iter: int = 100, newton_iter: int = 30, 
-                              err6: float = 1e-6, err: float = 1e-6) -> List[complex]:
+                              err6: float = 1e-6, err: float = 1e-6, zero_threshold: float = 1e-10) -> List[complex]:
         """Use Aberth+Newton method to solve all roots with custom parameters"""
         # Set random seed
         random.seed(int(time.time()))
@@ -168,7 +168,7 @@ class ComplexEquationSolver:
             # Newton refinement
             z = self.newton_refinement(z, newton_iter)
             
-            # Add new roots to the collection
+            # Add new roots to the collection (check for duplicates)
             for root in z:
                 is_duplicate = False
                 for existing_root in all_roots:
@@ -178,7 +178,7 @@ class ComplexEquationSolver:
                 if not is_duplicate:
                     all_roots.append(root)
         
-        # Additional search for roots near the origin
+        # Additional search for roots near the origin if we haven't found enough roots
         if len(all_roots) < self.degree:
             # Try some specific starting points
             test_points = [
@@ -213,7 +213,59 @@ class ComplexEquationSolver:
                 if not is_duplicate and abs(self.f(x)) < err6:
                     all_roots.append(x)
         
-        return all_roots
+        # Now process the roots to detect multiplicity
+        return self._process_roots_with_multiplicity(all_roots, err, zero_threshold)
+    
+    def _process_roots_with_multiplicity(self, roots: List[complex], tolerance: float, zero_threshold: float = 1e-8) -> List[complex]:
+        """Process roots to detect and handle multiplicity - return n roots (including multiplicities)"""
+        if not roots:
+            return []
+        
+        # Clean roots: set real/imaginary parts to 0 if they're close to 0
+        cleaned_roots = []
+        for root in roots:
+            real_part = root.real if abs(root.real) > zero_threshold else 0.0
+            imag_part = root.imag if abs(root.imag) > zero_threshold else 0.0
+            cleaned_roots.append(complex(real_part, imag_part))
+        
+        # Sort roots by real part (ascending), then by imaginary part (ascending)
+        cleaned_roots.sort(key=lambda x: (x.real, x.imag))
+        
+        # Group roots by proximity and calculate multiplicity
+        processed_roots = []
+        i = 0
+        
+        while i < len(cleaned_roots):
+            current_root = cleaned_roots[i]
+            multiplicity = 1
+            
+            # Count how many roots are close to the current root
+            j = i + 1
+            while j < len(cleaned_roots) and abs(cleaned_roots[j] - current_root) < tolerance:
+                multiplicity += 1
+                j += 1
+            
+            # Add the root with its multiplicity (repeat the root based on multiplicity)
+            for _ in range(multiplicity):
+                processed_roots.append(current_root)
+            
+            i = j
+        
+        # Ensure we have exactly n roots (where n is the degree of the polynomial)
+        # If we have fewer roots, add the most common root to reach n roots
+        while len(processed_roots) < self.degree:
+            if processed_roots:
+                # Add the most common root (first one after sorting)
+                processed_roots.append(processed_roots[0])
+            else:
+                # If no roots found, add zeros
+                processed_roots.append(complex(0, 0))
+        
+        # If we have more than n roots, take the first n
+        if len(processed_roots) > self.degree:
+            processed_roots = processed_roots[:self.degree]
+        
+        return processed_roots
     
     def _get_equation_string(self) -> str:
         """Get string representation of the equation"""
@@ -384,6 +436,7 @@ def solve():
         chongshumax = int(params.get('chongshumax', 30000))
         print_precision = int(params.get('printprecision', 9))
         range_val = float(params.get('range', 150))
+        zero_threshold = float(params.get('zero_threshold', 1e-8))
         
         # Create solver and find roots with custom parameters
         solver = ComplexEquationSolver(coefficients)
@@ -392,7 +445,8 @@ def solve():
             aberth_iter=aberth_iter,
             newton_iter=50,
             err6=err6,
-            err=err
+            err=err,
+            zero_threshold=zero_threshold
         )
         
         # Prepare results
